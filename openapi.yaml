@@ -1,0 +1,120 @@
+openapi: "3.0.0"
+servers:
+  - url: /api
+info:
+  version: 1.0.0
+  title: Adapter service for Phillips Hue Bridge
+paths:
+  /lightgroups:
+    get:
+      tags:
+        - LightGroup
+      security:
+        - basicAuth: []
+      description: Get all light groups
+      responses:
+        '200':
+          description: Success
+          $ref: "#/components/responses/LightGroupResponse"
+        '401':
+          description: Unauthorized
+          $ref: "#/components/responses/UnauthorizedError"
+  /toggle/{lightGroupId}:
+      get:
+        tags:
+          - LightGroup
+        security:
+          - basicAuth: []
+        parameters:
+          - name: lightGroupId
+            in: path
+            required: true
+            schema:
+              type: integer
+        responses:
+          "200":
+            description: Successfully toggled Light Group
+          "400":
+            description: LightGroup not found
+          "401":
+            description: Unauthorized
+            $ref: "#/components/responses/UnauthorizedError"
+  /mode/{lightGroupId}:
+    get:
+      tags:
+        - LightGroup
+      security:
+        - basicAuth: []
+      description: Switch Light Group to a lighting mode
+      parameters:
+        - name: lightGroupId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/LightMode"
+      responses:
+        '200':
+          description: "Light Mode was applied"
+        '404':
+          description: "Light Group not found"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  responses:
+    UnauthorizedError:
+      description: Authentication failed
+      headers:
+        WWW_Authenticate:
+          schema:
+            type: string
+    LightGroupResponse:
+      description: Lists of avaialable Light Groups
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              lightgroups:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LightGroup"
+  schemas:
+    LightGroup:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+        state:
+          $ref: "#/components/schemas/GroupState"
+        lights:
+          type: array
+          items:
+            type: string
+    GroupState:
+      type: string
+      enum:
+        - AllOn
+        - AnyOn
+    LightMode:
+      type: string
+      enum:
+        - day
+        - night
+
+security:
+  - basicAuth: []
+
+
+        
