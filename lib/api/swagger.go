@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bongofriend/hue-api/gen"
+	"github.com/bongofriend/hue-api/lib/gen"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gorilla/mux"
 	"github.com/swaggest/swgui/v5emb"

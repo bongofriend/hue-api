@@ -3,4 +3,4 @@ generate:
   gorilla-server: true
   models: true
   embedded-spec: true
-output: gen/gen.go
+output: lib/gen/gen.go

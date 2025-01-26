@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bongofriend/hue-api/gen"
-	"github.com/bongofriend/hue-api/services"
+	"github.com/bongofriend/hue-api/lib/gen"
+	"github.com/bongofriend/hue-api/lib/services"
 	"github.com/gorilla/mux"
 )
 
