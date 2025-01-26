@@ -8,7 +8,10 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 )
 
-require github.com/vearutop/statigz v1.4.0 // indirect
+require (
+	github.com/amimof/huego v1.2.1 // indirect
+	github.com/vearutop/statigz v1.4.0 // indirect
+)
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
@@ -20,6 +23,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/speakeasy-api/jsonpath v0.5.0 // indirect
 	github.com/speakeasy-api/openapi-overlay v0.10.0 // indirect

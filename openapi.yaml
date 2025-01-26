@@ -64,6 +64,28 @@ paths:
           description: "Light Group not found"
         '401':
           $ref: "#/components/responses/UnauthorizedError"
+  /brightness/{lightGroupId}:
+    get:
+      tags:
+        - LightGroup
+      parameters:
+        - name: lightGroupId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: level
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Brightness"
+      responses:
+        "200":
+          description: "Successfully adjusted brightness for Light Group"
+        "401":
+          description: "Unauthorized"
+          $ref: "#/components/responses/UnauthorizedError"
+        
 
 components:
   securitySchemes:
@@ -102,16 +124,28 @@ components:
           type: array
           items:
             type: string
+      required:
+        - name
+        - id
+        - state
+        - lights
+      readOnly: false
     GroupState:
       type: string
       enum:
         - AllOn
         - AnyOn
+        - None
     LightMode:
       type: string
       enum:
         - day
         - night
+    Brightness:
+      type: string
+      enum:
+        - inc
+        - dec
 
 security:
   - basicAuth: []

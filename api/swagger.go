@@ -1,30 +1,35 @@
 package api
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"net/http"
-	"os"
 
+	"github.com/bongofriend/hue-api/gen"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gorilla/mux"
 	"github.com/swaggest/swgui/v5emb"
 )
 
-func ConfigureDocRouter(router *mux.Router, openApiFilePath string) {
+func ConfigureDocRouter(router *mux.Router) error {
+	swagger, err := gen.GetSwagger()
+	if err != nil {
+		return err
+	}
+
 	docsRouter := router.PathPrefix("/docs").Subrouter()
-	docsRouter.Handle("/openapi", ServeOpenApiSpec(openApiFilePath)).Methods("GET")
+	docsRouter.Handle("/openapi", serveOpenApiSpec(swagger)).Methods("GET")
 	docsRouter.PathPrefix("/swagger").Handler(v5emb.New("Hue-Adapter", "http://localhost:8080/docs/openapi", "/docs/swagger/"))
+
+	return nil
 }
 
-func ServeOpenApiSpec(openApiFilePath string) http.HandlerFunc {
+func serveOpenApiSpec(swaggerSpec *openapi3.T) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		file, err := os.Open(openApiFilePath)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		if _, err := io.Copy(w, file); err != nil {
+		specBuf, _ := swaggerSpec.MarshalJSON()
+
+		if _, err := io.Copy(w, bytes.NewReader(specBuf)); err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
