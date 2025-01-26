@@ -28,8 +28,14 @@ func main() {
 	if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
 		panic(err)
 	}
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.Port),
+		Handler: mainRouter,
+	}
 	log.Printf("API server listening on port: %d", cfg.Port)
-	http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.Port), mainRouter)
+	if err := server.ListenAndServe(); err != nil {
+		log.Println(err)
+	}
 }
 
 func parsArgs() string {

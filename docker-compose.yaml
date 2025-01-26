@@ -1,6 +1,6 @@
 services:
   api:
-    image: ghcr.io/bongofriend/hue-api:v1.0.0
+    image: ghcr.io/bongofriend/hue-api:latest
     ports:
       - 8080:8080
     command: -configFilePath ./config.json
