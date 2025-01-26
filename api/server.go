@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bongofriend/hue-api/config"
 	"github.com/bongofriend/hue-api/gen"
 	"github.com/bongofriend/hue-api/services"
 	"github.com/gorilla/mux"
@@ -14,8 +13,9 @@ import (
 
 var _ gen.ServerInterface = (*Server)(nil)
 
-func ConfigureApiRouter(mainRouter *mux.Router, cfg config.AppConfig) error {
-	hueService, err := services.NewHueService(cfg.Hue)
+func ConfigureApiRouter(mainRouter *mux.Router, configService services.ConfigService) error {
+	cfg, _ := configService.GetConfig()
+	hueService, err := services.NewHueService(configService)
 	if err != nil {
 		return fmt.Errorf("could not start HueService: %w", err)
 	}
@@ -37,11 +37,18 @@ func ConfigureApiRouter(mainRouter *mux.Router, cfg config.AppConfig) error {
 
 type Server struct {
 	hueService services.HueService
+	services.ConfigService
 }
 
 // GetBrightnessLightGroupId implements gen.ServerInterface.
 func (s *Server) GetBrightnessLightGroupId(w http.ResponseWriter, r *http.Request, lightGroupId int, params gen.GetBrightnessLightGroupIdParams) {
-	panic("unimplemented")
+	if err := s.hueService.AdjustLightGroupBrigtness(r.Context(), lightGroupId, params.Level); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
 }
 
 // GetLightgroups implements gen.ServerInterface.
@@ -66,14 +73,17 @@ func (s *Server) GetLightgroups(w http.ResponseWriter, r *http.Request) {
 
 // GetModeLightGroupId implements gen.ServerInterface.
 func (s *Server) GetModeLightGroupId(w http.ResponseWriter, r *http.Request, lightGroupId int, params gen.GetModeLightGroupIdParams) {
-	panic("unimplemented")
+	if err := s.hueService.UpdateLightMode(r.Context(), lightGroupId, params.Mode); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
-// TODO: Test implementation later (429 by Hue API)
 // GetToggleLightGroupId implements gen.ServerInterface.
 func (s *Server) GetToggleLightGroupId(w http.ResponseWriter, r *http.Request, lightGroupId int) {
-	err := s.hueService.ToggleLightGroup(r.Context(), lightGroupId)
-	if err != nil {
+	if err := s.hueService.ToggleLightGroup(r.Context(), lightGroupId); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

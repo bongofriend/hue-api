@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bongofriend/hue-api/config"
 	"github.com/bongofriend/hue-api/gen"
+	"github.com/bongofriend/hue-api/services"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
@@ -31,16 +31,14 @@ type basicAuthUser struct {
 }
 
 type basicAuthValidator struct {
-	users []basicAuthUser
+	user basicAuthUser
 }
 
-func newBasicAuthenticator(authConfig config.AuthConfig) authValidator {
+func newBasicAuthenticator(authConfig services.AuthConfig) authValidator {
 	return basicAuthValidator{
-		[]basicAuthUser{
-			basicAuthUser{
-				Username: authConfig.Username,
-				Password: authConfig.Password,
-			},
+		user: basicAuthUser{
+			Username: authConfig.Username,
+			Password: authConfig.Password,
 		},
 	}
 }
@@ -60,10 +58,8 @@ func (b basicAuthValidator) validate(authHeaderValue string) (basicAuthUser, err
 		return basicAuthUser{}, errors.New("authorization header malformed")
 	}
 
-	for _, user := range b.users {
-		if user.Username == split[0] && user.Password == split[1] {
-			return user, nil
-		}
+	if b.user.Username == split[0] && b.user.Password == split[1] {
+		return b.user, nil
 	}
 
 	return basicAuthUser{}, errors.New("no matching BasicAuth credentials found")
@@ -104,6 +100,7 @@ func openApiValidatorMiddleware(swagger *openapi3.T) gen.MiddlewareFunc {
 		Options: openapi3filter.Options{
 			AuthenticationFunc: openApiValidator,
 		},
+		SilenceServersWarning: true,
 	})
 }
 

@@ -3,30 +3,62 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/amimof/huego"
-	"github.com/bongofriend/hue-api/config"
 	"github.com/bongofriend/hue-api/gen"
+)
+
+const (
+	brigtnessStep       uint8 = 20
+	dayModeBrightness         = 100
+	nightModeBrightness       = 10
+	maxBrightness             = 100
+	minBrightness             = 20
 )
 
 type HueService interface {
 	GetLightGroups(ctx context.Context) ([]gen.LightGroup, error)
 	ToggleLightGroup(ctx context.Context, lightGroupId int) error
+	UpdateLightMode(ctx context.Context, lightGroupId int, mode gen.LightMode) error
+	AdjustLightGroupBrigtness(ctx context.Context, lightGroupId int, brightnessLevel gen.Brightness) error
 }
 
 type hueService struct {
 	bridge *huego.Bridge
 }
 
-func NewHueService(hueConfig config.HueConfig) (HueService, error) {
+func NewHueService(configService ConfigService) (HueService, error) {
 	bridge, err := huego.Discover()
 	if err != nil {
 		return nil, err
 	}
-	bridge = bridge.Login(hueConfig.Username)
+	if err := handleBridgeLogin(bridge, configService); err != nil {
+		return nil, err
+	}
 	return hueService{
 		bridge: bridge,
 	}, nil
+}
+
+func handleBridgeLogin(bridge *huego.Bridge, configService ConfigService) error {
+	config, _ := configService.GetConfig()
+	if config.Hue.Username == nil {
+		log.Printf("No username found in config. Attepting to create new user on Hue Bridge %s. Waiting for 15 seconds", bridge.ID)
+		time.Sleep(15 * time.Second)
+		usereName, err := bridge.CreateUser(config.Hue.PlainUsername)
+		if err != nil {
+			return fmt.Errorf("could not create user on Bridge %s: %s", bridge.ID, config.Hue.PlainUsername)
+		}
+		config.Hue.Username = &usereName
+		if err := configService.UpdateConfig(config); err != nil {
+			return err
+		}
+	} else {
+		bridge = bridge.Login(*config.Hue.Username)
+	}
+	return nil
 }
 
 // GetLightGroups implements HueService.
@@ -44,19 +76,15 @@ func (h hueService) GetLightGroups(ctx context.Context) ([]gen.LightGroup, error
 }
 
 // ToggleLightGroup implements HueService.
-func (h hueService) ToggleLightGroup(ctx context.Context, lightGrouoId int) error {
-	group, err := h.bridge.GetGroupContext(ctx, lightGrouoId)
+func (h hueService) ToggleLightGroup(ctx context.Context, lightGroupId int) error {
+	group, err := h.bridge.GetGroupContext(ctx, lightGroupId)
 	if err != nil {
 		return fmt.Errorf("could not toggle Light Group: %w", err)
 	}
-	if group.GroupState.AllOn || group.GroupState.AnyOn {
-		group.State.On = false
-	} else {
-		group.State.On = true
+	if group.IsOn() {
+		return group.OffContext(ctx)
 	}
-	group.State.On = !group.GroupState.AllOn && !group.GroupState.AnyOn
-	_, err = h.bridge.SetGroupState(lightGrouoId, *group.State)
-	return err
+	return group.OnContext(ctx)
 }
 
 func mapToLightGroup(g huego.Group) gen.LightGroup {
@@ -78,4 +106,42 @@ func mapToLightGroup(g huego.Group) gen.LightGroup {
 		lightGroup.Lights[idx] = l
 	}
 	return lightGroup
+}
+
+// UpdateLightMode implements HueService.
+func (h hueService) UpdateLightMode(ctx context.Context, lightGroupId int, mode gen.LightMode) error {
+	g, err := h.bridge.GetGroupContext(ctx, lightGroupId)
+	if err != nil {
+		return fmt.Errorf("could not set LightMode %s for LightGroup %d: %w", mode, lightGroupId, err)
+	}
+	switch mode {
+	case gen.Day:
+		return g.BriContext(ctx, dayModeBrightness)
+	case gen.Night:
+		return g.BriContext(ctx, nightModeBrightness)
+	}
+	return fmt.Errorf("unsupported LightMode %s", mode)
+}
+
+// AdjustLightGroupBrigtness implements HueService.
+func (h hueService) AdjustLightGroupBrigtness(ctx context.Context, lightGroupId int, brightnessLevel gen.Brightness) error {
+	g, err := h.bridge.GetGroupContext(ctx, lightGroupId)
+	if err != nil {
+		return fmt.Errorf("could not adjust brightness for LightGroup %d: %w", lightGroupId, err)
+	}
+	bri := g.State.Bri
+	if brightnessLevel == gen.Inc {
+		if bri == maxBrightness {
+			log.Printf("Max brightness level for LightGroup %d reached. Disgarding adjustment", lightGroupId)
+			return nil
+		}
+		bri += brigtnessStep
+	} else if brightnessLevel == gen.Dec {
+		if bri == minBrightness {
+			log.Printf("Min brightness level for LightGroup %d reached. Disgarding adjustment", lightGroupId)
+			return nil
+		}
+		bri -= brigtnessStep
+	}
+	return g.BriContext(ctx, bri)
 }

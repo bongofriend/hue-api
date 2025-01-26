@@ -4,11 +4,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/bongofriend/hue-api/api"
-	"github.com/bongofriend/hue-api/config"
+	"github.com/bongofriend/hue-api/services"
 	"github.com/gorilla/mux"
 )
 
@@ -32,12 +33,17 @@ func (c *configFilPath) Set(value string) error {
 
 // String implements flag.Value.
 func (c *configFilPath) String() string {
+	if len(*c) == 0 {
+		log.Println("No path to config file found. Defaulting to ./config.json")
+		*c = "./config.json"
+	}
 	return string(*c)
 }
 
 func main() {
-	//cfgPath := parsArgs()
-	cfg, err := config.GetConfig("config.json")
+	cfgPath := parsArgs()
+	configService := services.NewConfigServuce(string(cfgPath))
+	cfg, err := configService.GetConfig()
 	if err != nil {
 		panic(err)
 	}
@@ -46,9 +52,10 @@ func main() {
 	if err := api.ConfigureDocRouter(mainRouter); err != nil {
 		panic(err)
 	}
-	if err := api.ConfigureApiRouter(mainRouter, cfg); err != nil {
+	if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
 		panic(err)
 	}
+	log.Printf("API server listening on port: %d", cfg.Port)
 	http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.Port), mainRouter)
 }
 
