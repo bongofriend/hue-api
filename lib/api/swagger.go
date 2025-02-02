@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/bongofriend/hue-api/lib/gen"
 	"github.com/bongofriend/hue-api/lib/services"
@@ -20,12 +21,21 @@ func ConfigureDocRouter(router *mux.Router, cfg services.AppConfig) error {
 		log.Println("Swagger UI disabled")
 		return nil
 	}
+
+	url, err := url.Parse(cfg.BasePath)
+	if err != nil {
+		panic(err)
+	}
+
 	swagger, err := gen.GetSwagger()
 	if err != nil {
 		return err
 	}
 
+	corsHandler := Cors(url.Host)
+
 	docsRouter := router.PathPrefix("/docs").Subrouter()
+	docsRouter.Use(mux.MiddlewareFunc(corsHandler))
 	docsRouter.Handle("/openapi", serveOpenApiSpec(swagger)).Methods("GET")
 	docsRouter.PathPrefix("/swagger").Handler(
 		v5emb.NewHandlerWithConfig(swgui.Config{

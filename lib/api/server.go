@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const apiPathPrefix string = "/api"
+
 var _ gen.ServerInterface = (*Server)(nil)
 
 func ConfigureApiRouter(mainRouter *mux.Router, configService services.ConfigService) error {
@@ -27,7 +29,7 @@ func ConfigureApiRouter(mainRouter *mux.Router, configService services.ConfigSer
 	}
 
 	gen.HandlerWithOptions(&server, gen.GorillaServerOptions{
-		BaseURL:     "/api",
+		BaseURL:     apiPathPrefix,
 		Middlewares: []gen.MiddlewareFunc{loggerMiddleware, openApiValidatorMiddleware(swagger), authMiddleWare(newBasicAuthenticator(cfg.Auth))},
 		BaseRouter:  mainRouter,
 	})

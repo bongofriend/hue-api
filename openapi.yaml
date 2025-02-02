@@ -1,7 +1,9 @@
 openapi: "3.0.0"
 servers:
   - url: /api
+    description: Local instance
   - url: /hue-api/api
+    description: Deployed instance
 info:
   version: 1.0.0
   title: Adapter service for Phillips Hue Bridge

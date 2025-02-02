@@ -31,9 +31,9 @@ func main() {
 	if err := api.ConfigureDocRouter(mainRouter, cfg); err != nil {
 		panic(err)
 	}
-	/*if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
+	if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
 		panic(err)
-	}*/
+	}
 	corsHandler := api.Cors(url.Host)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
