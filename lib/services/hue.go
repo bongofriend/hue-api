@@ -32,10 +32,10 @@ type hueService struct {
 func NewHueService(configService ConfigService) (HueService, error) {
 	bridge, err := huego.Discover()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("hue brigde discovery: %w", err)
 	}
 	if err := handleBridgeLogin(bridge, configService); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("hue bridge login: %w", err)
 	}
 	return hueService{
 		bridge: bridge,

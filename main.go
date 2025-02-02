@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/bongofriend/hue-api/lib/api"
 	"github.com/bongofriend/hue-api/lib/services"
@@ -21,16 +22,22 @@ func main() {
 		panic(err)
 	}
 
+	url, err := url.Parse(cfg.BasePath)
+	if err != nil {
+		panic(err)
+	}
+
 	mainRouter := mux.NewRouter()
-	if err := api.ConfigureDocRouter(mainRouter); err != nil {
+	if err := api.ConfigureDocRouter(mainRouter, cfg); err != nil {
 		panic(err)
 	}
-	if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
+	/*if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
 		panic(err)
-	}
+	}*/
+	corsHandler := api.Cors(url.Host)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
-		Handler: mainRouter,
+		Handler: corsHandler(mainRouter),
 	}
 	log.Printf("API server listening on port: %d", cfg.Port)
 	if err := server.ListenAndServe(); err != nil {
@@ -41,7 +48,7 @@ func main() {
 func parsArgs() string {
 	var p string
 
-	flag.StringVar(&p, "configFilePath", "Path to config file", "")
+	flag.StringVar(&p, "configFilePath", "./config.json", "Path to config file")
 	flag.Parse()
 
 	return p

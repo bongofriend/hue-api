@@ -3,19 +3,17 @@ module github.com/bongofriend/hue-api
 go 1.23.4
 
 require (
+	github.com/amimof/huego v1.2.1
 	github.com/gorilla/mux v1.8.1
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/oapi-codegen/runtime v1.1.1
 )
 
-require (
-	github.com/amimof/huego v1.2.1 // indirect
-	github.com/vearutop/statigz v1.4.0 // indirect
-)
+require github.com/vearutop/statigz v1.4.0 // indirect
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/getkin/kin-openapi v0.128.0 // indirect
+	github.com/getkin/kin-openapi v0.128.0
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
