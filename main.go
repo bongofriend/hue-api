@@ -22,14 +22,14 @@ func main() {
 	}
 
 	mainRouter := mux.NewRouter()
-	if err := api.ConfigureDocRouter(mainRouter); err != nil {
+	if err := api.ConfigureDocRouter(mainRouter, cfg); err != nil {
 		panic(err)
 	}
 	if err := api.ConfigureApiRouter(mainRouter, configService); err != nil {
 		panic(err)
 	}
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Port),
+		Addr:    fmt.Sprintf("%s:%d", cfg.Hostname, cfg.Port),
 		Handler: mainRouter,
 	}
 	log.Printf("API server listening on port: %d", cfg.Port)

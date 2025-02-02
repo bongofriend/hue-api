@@ -2,17 +2,23 @@ package api
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 
 	"github.com/bongofriend/hue-api/lib/gen"
+	"github.com/bongofriend/hue-api/lib/services"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gorilla/mux"
 	"github.com/swaggest/swgui/v5emb"
 )
 
-func ConfigureDocRouter(router *mux.Router) error {
+func ConfigureDocRouter(router *mux.Router, cfg services.AppConfig) error {
+	if !cfg.ShowSwaggerUI {
+		log.Println("Swagger UI disabled")
+		return nil
+	}
 	swagger, err := gen.GetSwagger()
 	if err != nil {
 		return err
@@ -20,7 +26,13 @@ func ConfigureDocRouter(router *mux.Router) error {
 
 	docsRouter := router.PathPrefix("/docs").Subrouter()
 	docsRouter.Handle("/openapi", serveOpenApiSpec(swagger)).Methods("GET")
-	docsRouter.PathPrefix("/swagger").Handler(v5emb.New("Hue-Adapter", "http://localhost:8080/docs/openapi", "/docs/swagger/"))
+	docsRouter.PathPrefix("/swagger").Handler(
+		v5emb.New(
+			"Hue-Adapter",
+			fmt.Sprintf("http://%s:%d/docs/openapi", cfg.Hostname, cfg.Port),
+			"/docs/swagger/",
+		),
+	)
 
 	return nil
 }

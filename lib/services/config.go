@@ -7,9 +7,11 @@ import (
 )
 
 type AppConfig struct {
-	Port int        `json:"port"`
-	Auth AuthConfig `json:"auth"`
-	Hue  HueConfig  `json:"hue"`
+	Port          int        `json:"port"`
+	ShowSwaggerUI bool       `json:"showSwaggerUI"`
+	Hostname      string     `json:"hostname"`
+	Auth          AuthConfig `json:"auth"`
+	Hue           HueConfig  `json:"hue"`
 }
 
 type AuthConfig struct {
