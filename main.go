@@ -28,6 +28,7 @@ func main() {
 	}
 
 	mainRouter := mux.NewRouter()
+	api.ConfigureHealthRouter(mainRouter)
 	if err := api.ConfigureDocRouter(mainRouter, cfg); err != nil {
 		panic(err)
 	}

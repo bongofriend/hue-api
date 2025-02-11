@@ -13,5 +13,6 @@ RUN go build -o app
 FROM alpine:3.21.2
 USER root
 WORKDIR /home/app
+RUN apk --no-cache add curl
 COPY --from=builder /home/builder/hue-api/app .
 ENTRYPOINT [ "./app" ]
