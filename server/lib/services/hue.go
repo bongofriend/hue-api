@@ -12,9 +12,9 @@ import (
 
 const (
 	brigtnessStep       uint8 = 20
-	dayModeBrightness         = 100
+	dayModeBrightness         = 255
 	nightModeBrightness       = 10
-	maxBrightness             = 100
+	maxBrightness             = 255
 	minBrightness             = 20
 )
 
