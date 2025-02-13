@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/bongofriend/hue-api/lib/api"
-	"github.com/bongofriend/hue-api/lib/services"
+	"github.com/bongofriend/hue-api/server/lib/api"
+	"github.com/bongofriend/hue-api/server/lib/services"
 	"github.com/gorilla/mux"
 )
 

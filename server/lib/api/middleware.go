@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bongofriend/hue-api/lib/gen"
-	"github.com/bongofriend/hue-api/lib/services"
+	"github.com/bongofriend/hue-api/server/lib/gen"
+	"github.com/bongofriend/hue-api/server/lib/services"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
