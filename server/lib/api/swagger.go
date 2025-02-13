@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/bongofriend/hue-api/lib/gen"
-	"github.com/bongofriend/hue-api/lib/services"
+	"github.com/bongofriend/hue-api/server/lib/gen"
+	"github.com/bongofriend/hue-api/server/lib/services"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gorilla/mux"
 	"github.com/swaggest/swgui"

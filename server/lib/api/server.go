@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bongofriend/hue-api/lib/gen"
-	"github.com/bongofriend/hue-api/lib/services"
+	"github.com/bongofriend/hue-api/server/lib/gen"
+	"github.com/bongofriend/hue-api/server/lib/services"
 	"github.com/gorilla/mux"
 )
 
@@ -65,12 +65,13 @@ func (s *Server) GetLightgroups(w http.ResponseWriter, r *http.Request) {
 	rsp := gen.LightGroupResponse{
 		Lightgroups: &lightGroups,
 	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "application/json")
 	if err := encoder.Encode(rsp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Panicln(err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 // GetModeLightGroupId implements gen.ServerInterface.

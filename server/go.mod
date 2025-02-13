@@ -1,4 +1,4 @@
-module github.com/bongofriend/hue-api
+module github.com/bongofriend/hue-api/server
 
 go 1.23.4
 

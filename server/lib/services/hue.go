@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/amimof/huego"
-	"github.com/bongofriend/hue-api/lib/gen"
+	"github.com/bongofriend/hue-api/server/lib/gen"
 )
 
 const (

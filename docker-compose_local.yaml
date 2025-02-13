@@ -13,5 +13,5 @@ services:
     command: -configFilePath ./config.json
     volumes:
       - type: bind
-        source: ./config.json
+        source: ./server/config.json
         target: /home/app/config.json
