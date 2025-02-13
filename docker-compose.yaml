@@ -1,16 +1,22 @@
 services:
   api:
-    image: ghcr.io/bongofriend/hue-api:latest
+    image: ghcr.io/bongofriend/hue-api:v1.1.1
+    networks:
+      - ingress
     ports:
       - 8080:8080
     command: -configFilePath ./config.json
     healthcheck:
-      test: ["curl", "-f", "http://localhost:8080/health"]
+      test: "curl -f http://localhost:8080/health"
       interval: 1m30s
       timeout: 30s
       retries: 5
       start_period: 30s
     volumes:
       - type: bind
-        source: ./config.json
+        source: /home/dietpi/hue/config.json
         target: /home/app/config.json
+networks:
+  ingress:
+    name: ingress
+    external: true
