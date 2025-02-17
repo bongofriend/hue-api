@@ -39,7 +39,6 @@ func ConfigureApiRouter(mainRouter *mux.Router, configService services.ConfigSer
 
 type Server struct {
 	hueService services.HueService
-	services.ConfigService
 }
 
 // GetBrightnessLightGroupId implements gen.ServerInterface.
