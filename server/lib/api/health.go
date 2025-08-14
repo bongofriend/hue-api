@@ -7,7 +7,7 @@ import (
 )
 
 func ConfigureHealthRouter(mux *mux.Router) {
-	mux.HandleFunc("/health", health).Methods("GET")
+	mux.HandleFunc("/", health).Methods("GET")
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
